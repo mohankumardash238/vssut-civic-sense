@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - VSSUT Civic Sense</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo">
+            <i class="fas fa-shield-heart"></i> Censible
+        </div>
+        <ul class="nav-links">
+
+
+            <li><a href="login.html" onclick="logout()">Logout</a></li>
+        </ul>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <section class="hero" style="min-height: 50vh; height: auto; padding-bottom: 2rem;">
+        <div class="container hero-content">
+            <h1>Student Dashboard</h1>
+            <p>Welcome back! Report issues, track status, and contribute to a better campus.</p>
+        </div>
+    </section>
+
+    <section id="dashboard" class="cards-section" style="padding-top: 2rem; background: var(--bg-body);">
+        <div class="container">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="grid">
+
+                <!-- Report Cleanliness -->
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-broom"></i></div>
+                    <h3>Report Cleanliness</h3>
+                    <p>Found garbage or uncleaned areas? Upload a photo and let us know.</p>
+                    <form class="report-form" onsubmit="handleReport(event, 'Cleanliness')">
+                        <select required>
+                            <option value="">Select Location</option>
+                            <option value="College Premises">College Premises</option>
+                            <option value="Kalam Hall">Kalam Hall</option>
+                            <option value="Vasistha Hall">Vasistha Hall</option>
+                            <option value="Anuradha Hall">Anuradha Hall</option>
+                            <option value="Pulaha Hall">Pulaha Hall</option>
+                            <option value="Agastya Hall">Agastya Hall</option>
+                            <option value="Pulastya Hall">Pulastya Hall</option>
+                        </select>
+                        <textarea placeholder="Description..." rows="2"></textarea>
+                        <input type="file" accept="image/*" class="file-input">
+                        <button type="submit" class="btn btn-sm">Submit Report</button>
+                    </form>
+                </div>
+
+                <!-- Maintenance Issue -->
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-tools"></i></div>
+                    <h3>Maintenance</h3>
+                    <p>Broken fans, lights, or furniture? Report it for quick repair.</p>
+                    <form class="report-form" onsubmit="handleReport(event, 'Maintenance')">
+                        <select required>
+                            <option value="">Select Location</option>
+                            <option value="College Premises">College Premises</option>
+                            <option value="Kalam Hall">Kalam Hall</option>
+                            <option value="Vasistha Hall">Vasistha Hall</option>
+                            <option value="Anuradha Hall">Anuradha Hall</option>
+                            <option value="Pulaha Hall">Pulaha Hall</option>
+                            <option value="Agastya Hall">Agastya Hall</option>
+                            <option value="Pulastya Hall">Pulastya Hall</option>
+                        </select>
+                        <textarea placeholder="Issue Description..." rows="2"></textarea>
+                        <input type="file" accept="image/*" class="file-input">
+                        <button type="submit" class="btn btn-sm">Request Repair</button>
+                    </form>
+                </div>
+
+                <!-- My Status -->
+                <div id="dashu" class="card" style="border-top: 4px solid var(--accent);">
+                    <div class="card-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <h3>My Reports</h3>
+                    <p>Track the status of your previously submitted complaints.</p>
+                    <br>
+                    <ul id="reports-list" style="text-align: left; list-style: none; padding: 0;">
+                        <!-- Reports will be loaded here dynamically -->
+                        <li style="padding: 0.5rem 0; color: var(--text-muted);">Loading reports...</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+
+    <footer>
+        <p>&copy; 2025 VSSUT Civic Sense Initiative. Designed for a better campus.</p>
+    </footer>
+
+    <script>
+        const API_URL = window.location.protocol === 'file:' ? 'http://127.0.0.1:5000' : '';
+
+        // Theme Logic
+        const toggleBtn = document.getElementById('theme-toggle');
+        const icon = toggleBtn.querySelector('i');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+            icon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+
+            if (isDark) {
+                body.removeAttribute('data-theme');
+                icon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Load reports on startup
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadReports();
+            initScrollAnimations();
+        });
+
+        function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
+                alert('Please login first.');
+                window.location.href = 'login.html';
+            }
+        }
+
+        function initScrollAnimations() {
+            const cards = document.querySelectorAll('.card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        const delay = (index % 3) * 100;
+                        setTimeout(() => {
+                            entry.target.classList.remove('hidden-start');
+                            entry.target.classList.add('slide-in');
+                        }, delay);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            cards.forEach(card => {
+                card.classList.add('hidden-start');
+                observer.observe(card);
+            });
+        }
+
+        async function loadReports() {
+            const list = document.getElementById('reports-list');
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) return;
+
+            list.innerHTML = '<li style="padding: 0.5rem 0; color: var(--text-muted);">Loading reports...</li>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/reports?student_id=${user.id}`);
+                const reports = await response.json();
+
+                list.innerHTML = '';
+
+                if (reports.length === 0) {
+                    list.innerHTML = '<li style="padding: 0.5rem 0; color: var(--text-muted); font-size: 0.9rem;">No reports submitted yet.</li>';
+                    return;
+                }
+
+                // Show newest first (API sorts by date DESC usually, but assuming array)
+                reports.forEach(report => {
+                    const li = document.createElement('li');
+                    li.style.padding = '0.5rem 0';
+                    li.style.borderBottom = '1px solid var(--nav-border)';
+
+                    const statusColor = report.status === 'Resolved' ? 'green' : 'var(--secondary)';
+
+                    // Simple date formatting
+                    const dateStr = new Date(report.date).toLocaleDateString();
+
+                    let dateHtml = `<div style="font-size: 0.75rem; color: #888;">Reported: ${report.date}</div>`;
+                    if (report.status === 'Resolved' && report.resolved_date) {
+                        dateHtml += `<div style="font-size: 0.75rem; color: green; margin-top: 2px;">Resolved: ${report.resolved_date}</div>`;
+                    }
+
+                    li.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <span style="color: ${statusColor}; font-weight: bold; font-size: 0.9rem;">${report.status}</span> 
+                                <span style="font-weight: 600; margin-left: 0.5rem;">${report.type}</span>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">
+                                    ${report.location}
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                ${dateHtml}
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error loading reports:', error);
+                list.innerHTML = '<li style="color: red;">Error loading reports. Backend offline?</li>';
+            }
+        }
+
+        async function handleReport(event, type) {
+            event.preventDefault();
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) return;
+
+            const form = event.target;
+            const locationInput = form.querySelector('select');
+            const fileInput = form.querySelector('input[type="file"]');
+            const descInput = form.querySelector('textarea');
+            const submitBtn = form.querySelector('button');
+            const originalText = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = 'Submitting...';
+            submitBtn.disabled = true;
+
+            // Helper to post
+            const postReport = async (imageData = null) => {
+                const reportData = {
+                    student_id: user.id,
+                    type: type,
+                    location: locationInput.value,
+                    description: descInput.value,
+                    image: imageData
+                };
+
+                try {
+                    const response = await fetch(`${API_URL}/api/reports`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(reportData)
+                    });
+
+                    if (response.ok) {
+                        alert(`${type} report submitted successfully!`);
+                        form.reset();
+                        loadReports();
+                    } else {
+                        alert('Failed to submit report.');
+                    }
+                } catch (error) {
+                    console.error('Error submitting report:', error);
+                    alert('Error reaching server.');
+                } finally {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            };
+
+            // Handle Image if present
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    postReport(e.target.result);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                postReport(null);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - VSSUT Civic Sense</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Admin specific inline overrides if needed, mostly using style.css */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--nav-border);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .admin-table-container {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--nav-border);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--nav-border);
+        }
+
+        th {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(255, 126, 103, 0.1);
+            color: var(--secondary);
+        }
+
+        .status-resolved {
+            background: rgba(0, 128, 0, 0.1);
+            color: green;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .btn-resolve {
+            color: green;
+        }
+
+        .btn-reject {
+            color: red;
+        }
+
+        .btn-resolve:hover,
+        .btn-reject:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo">
+            <i class="fas fa-shield-heart"></i> Censible Admin
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="active">Dashboard</a></li>
+            <li><a href="admin_login.html">Logout</a></li>
+        </ul>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <section class="hero" style="min-height: 40vh; height: auto; padding-bottom: 2rem;">
+        <div class="container hero-content">
+            <h1>Admin Dashboard</h1>
+            <p>Overview of campus civic issues and student reports.</p>
+            <h3 id="category-header" style="color: var(--secondary); margin-top: 1rem; display: none;"></h3>
+        </div>
+    </section>
+
+    <section class="cards-section" style="padding-top: 1rem; position: relative; z-index: 2;">
+        <div class="container">
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="stats-total">0</div>
+                    <div class="stat-label">Total Reports</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stats-pending" style="color: var(--secondary);">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stats-resolved" style="color: green;">0</div>
+                    <div class="stat-label">Resolved</div>
+                </div>
+            </div>
+
+            <!-- Reports Table -->
+            <div class="admin-table-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="color: var(--primary);">Recent Reports</h3>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-sm" id="clear-filter-btn" onclick="clearFilter()"
+                            style="background-color: var(--accent); display: none;">All Reports</button>
+                        <button class="btn btn-sm" onclick="clearAllReports()" style="background-color: #dc3545;">Reset
+                            Data</button>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Location Details</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-reports-body">
+                        <!-- Dynamic Rows -->
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading
+                                data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 VSSUT Admin Panel.</p>
+    </footer>
+
+    <script>
+        const API_URL = window.location.protocol === 'file:' ? 'http://127.0.0.1:5000' : '';
+
+        const toggleBtn = document.getElementById('theme-toggle');
+        const icon = toggleBtn.querySelector('i');
+        const body = document.body;
+
+        // Check local storage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+            icon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+
+            if (isDark) {
+                body.removeAttribute('data-theme');
+                icon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // --- Admin Logic ---
+        function getStoredCategory() {
+            return localStorage.getItem('admin_category') || '';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const category = getStoredCategory();
+            if (category) {
+                document.getElementById('category-header').textContent = `Manage: ${category}`;
+                document.getElementById('category-header').style.display = 'block';
+                document.getElementById('clear-filter-btn').style.display = 'inline-block';
+            } else {
+                document.getElementById('category-header').textContent = 'All Reports';
+                document.getElementById('category-header').style.display = 'block';
+            }
+
+            loadAdminReports();
+            initScrollAnimations();
+        });
+
+        function initScrollAnimations() {
+            const cards = document.querySelectorAll('.card, .stat-card, .admin-table-container');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        const delay = (index % 3) * 100;
+                        setTimeout(() => {
+                            entry.target.classList.remove('hidden-start');
+                            entry.target.classList.add('slide-in');
+                        }, delay);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            cards.forEach(card => {
+                card.classList.add('hidden-start');
+                observer.observe(card);
+            });
+        }
+
+        async function loadAdminReports() {
+            const tbody = document.getElementById('admin-reports-body');
+            const category = getStoredCategory();
+
+            // Reset Stats Placeholder
+            document.getElementById('stats-total').textContent = '-';
+            document.getElementById('stats-pending').textContent = '-';
+            document.getElementById('stats-resolved').textContent = '-';
+
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading reports from database...</td></tr>';
+
+            try {
+                // Fetch from Backend
+                let url = `${API_URL}/api/reports`;
+                if (category) {
+                    url += `?domain=${encodeURIComponent(category)}`;
+                } else {
+                    url += `?domain=All Reports`; // Optional explicit flag
+                }
+
+                const response = await fetch(url);
+                const reports = await response.json();
+
+                if (!response.ok) throw new Error('Failed to load');
+
+                // Update Stats
+                document.getElementById('stats-total').textContent = reports.length;
+                document.getElementById('stats-pending').textContent = reports.filter(r => r.status === 'Pending').length;
+                document.getElementById('stats-resolved').textContent = reports.filter(r => r.status === 'Resolved').length;
+
+                tbody.innerHTML = '';
+
+                if (reports.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No reports found for this category.</td></tr>';
+                    return;
+                }
+
+                // API returns sorted, but ensuring logic matches
+                reports.forEach(report => {
+                    const tr = document.createElement('tr');
+                    const statusClass = report.status === 'Resolved' ? 'status-resolved' : 'status-pending';
+
+                    // Image Logic
+                    let imageHtml = '<span style="color: var(--text-muted); font-size: 0.8rem;">No Image</span>';
+                    if (report.image_url) { // Backend uses image_url
+                        imageHtml = `<img src="${report.image_url}" alt="Report" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid var(--nav-border); cursor: pointer;" onclick="openImage('${report.image_url}')">`;
+                    }
+
+                    // Action Buttons Logic
+                    let actionBtns = '';
+                    if (report.status !== 'Resolved') {
+                        actionBtns = `
+                            <button class="action-btn btn-resolve" onclick="updateStatus(${report.id}, 'Resolved')" title="Mark Resolved">
+                                <i class="fas fa-check-circle"></i>
+                            </button>
+                            <button class="action-btn btn-reject" onclick="deleteReport(${report.id})" title="Delete/Reject">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        `;
+                    } else {
+                        actionBtns = `<span style="color: green; font-size: 0.9rem;"><i class="fas fa-check"></i> Done</span>`;
+                    }
+
+                    // Format Date
+                    const dateDisplay = report.date.split(' ')[0]; // Show just date part to save space, or full string
+
+                    tr.innerHTML = `
+                        <td>${dateDisplay}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                 ${imageHtml}
+                                 <span style="font-weight: 500;">${report.type}</span>
+                            </div>
+                        </td>
+                        <td>${report.location}</td>
+                        <td><span class="status-badge ${statusClass}">${report.status}</span></td>
+                        <td>${actionBtns}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: red;">Error connecting to server. Is backend running?</td></tr>';
+            }
+        }
+
+        function openImage(src) {
+            const w = window.open("");
+            w.document.write(`<img src="${src}" style="max-width: 100%;">`);
+        }
+
+        async function updateStatus(id, newStatus) {
+            if (!confirm(`Mark this report as ${newStatus}?`)) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/reports/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (response.ok) {
+                    loadAdminReports();
+                } else {
+                    alert('Failed to update status');
+                }
+            } catch (error) {
+                alert('Connection error');
+            }
+        }
+
+        async function deleteReport(id) {
+            if (!confirm('Are you sure you want to delete this report?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/reports/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadAdminReports();
+                } else {
+                    alert('Failed to delete report');
+                }
+            } catch (error) {
+                alert('Connection error');
+            }
+        }
+
+        function clearFilter() {
+            localStorage.removeItem('admin_category');
+            window.location.reload();
+        }
+
+        function clearAllReports() {
+            alert('This feature is disabled in backend mode for safety.');
+        }
+    </script>
+</body>
+
+</html>

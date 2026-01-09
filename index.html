@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civic Sense - Empowering Communities</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom Styles for the New Index Page */
+        body {
+            overflow-x: hidden;
+        }
+
+        /* Navbar Enhancements */
+        nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] nav {
+            background: rgba(18, 18, 18, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Hero Section Redesign */
+        .hero-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 85vh;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .hero-bg-anim {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(50, 130, 184, 0.1) 0%, rgba(0, 0, 0, 0) 60%);
+            pointer-events: none;
+            animation: pulse-glow 8s infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+            animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .hero-title {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-weight: 400;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        /* Feature Section - "Antigravity" Style Cards */
+        .features-section {
+            padding: 8rem 0;
+            background: var(--bg-body);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            margin-top: 4rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            padding: 3rem;
+            border-radius: 24px;
+            border: 1px solid var(--nav-border);
+            text-align: left;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+            background: rgba(255, 126, 103, 0.1);
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .feature-desc {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Civic Guide Section */
+        .guide-section {
+            padding: 8rem 0;
+            background: linear-gradient(180deg, var(--bg-body) 0%, rgba(50, 130, 184, 0.05) 100%);
+        }
+
+        .guide-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .guide-header h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .guide-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .guide-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            border-top: 5px solid var(--accent);
+        }
+
+        .guide-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--primary);
+        }
+
+        .guide-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .guide-card li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .guide-card li::before {
+            content: '•';
+            color: var(--secondary);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 3rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="logo">
+            <i class="fas fa-shield-heart"></i> Censible
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <!-- Login Options -->
+            <a href="login.html" class="btn btn-white"
+                style="border: 1px solid var(--nav-border); padding: 0.6rem 1.2rem; font-size: 0.9rem;">Student
+                Login</a>
+            <a href="admin_login.html" class="btn btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">Admin
+                Login</a>
+
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode" style="margin-left: 0.5rem;">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-bg-anim"></div>
+        <div class="container hero-content">
+            <div
+                style="display: inline-block; padding: 0.5rem 1.5rem; background: rgba(50, 130, 184, 0.1); border-radius: 50px; color: var(--accent); font-weight: 600; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                ✨ Building a Better Tomorrow, Today
+            </div>
+            <h1 class="hero-title">Report Smart,<br />Resolve Faster.</h1>
+            <p class="hero-subtitle">
+                A modern platform connecting students, faculty, and administration to solve
+                campus issues efficiently. Report. Track. Improving together.
+            </p>
+            <div class="hero-actions">
+                <a href="#guide" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">Explore
+                    Guide</a>
+                <a href="login.html" class="btn btn-white"
+                    style="border: 1px solid var(--nav-border); padding: 1rem 2.5rem; font-size: 1.1rem;">Get
+                    Started</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <div style="text-align: center; max-width: 700px; margin: 0 auto;">
+                <h2 style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem;">Why Civic Sense?</h2>
+                <p style="color: var(--text-muted); font-size: 1.1rem;">We've streamlined the process of maintaining our
+                    community standards into three simple, powerful pillars.</p>
+            </div>
+
+            <div class="feature-grid">
+                <!-- Feature 1 -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-camera"></i></div>
+                    <h3 class="feature-title">Instant Reporting</h3>
+                    <p class="feature-desc">Spot an issue? Snap a photo and upload it instantly. Whether it's
+                        cleanliness, maintenance, or rule violations, your voice matters.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-project-diagram"></i></div>
+                    <h3 class="feature-title">Real-time Tracking</h3>
+                    <p class="feature-desc">Don't be left in the dark. Track the status of your reports from submission
+                        to resolution with our transparent dashboard.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3 class="feature-title">Admin Control</h3>
+                    <p class="feature-desc">Empowering authorities with a powerful interface to view, manage, and
+                        resolve complaints efficiently, ensuring accountability.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Civic Sense Guide Section (Moved from Student Page) -->
+    <section id="guide" class="guide-section">
+        <div class="container">
+            <div class="guide-header">
+                <h2>Basic Civic Sense Guide</h2>
+                <p style="color: var(--text-muted); font-size: 1.1rem;">Essential guidelines for a harmonious campus
+                    life.</p>
+            </div>
+
+            <div class="guide-cards">
+                <!-- Society -->
+                <div class="guide-card">
+                    <h3><i class="fas fa-users" style="color: var(--accent);"></i> In Society</h3>
+                    <ul>
+                        <li>Do not litter in public places.</li>
+                        <li>Follow traffic rules and park responsibly.</li>
+                        <li>Respect public property and parks.</li>
+                        <li>Avoid loud music late at night.</li>
+                    </ul>
+                </div>
+
+                <!-- College -->
+                <div class="guide-card">
+                    <h3><i class="fas fa-graduation-cap" style="color: var(--accent);"></i> In College</h3>
+                    <ul>
+                        <li>Keep classrooms and corridors clean.</li>
+                        <li>Switch off fans/lights when leaving.</li>
+                        <li>Maintain silence in the library.</li>
+                        <li>Respect faculty and staff members.</li>
+                    </ul>
+                </div>
+
+                <!-- Hostel -->
+                <div class="guide-card">
+                    <h3><i class="fas fa-bed" style="color: var(--accent);"></i> In Hostel</h3>
+                    <ul>
+                        <li>Keep your room and washrooms hygienic.</li>
+                        <li>Do not waste water and electricity.</li>
+                        <li>Respect roommates' privacy and space.</li>
+                        <li>Follow hostel timings and discipline.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+                <div style="text-align: left;">
+                    <div class="logo" style="margin-bottom: 0.5rem; font-size: 1.2rem;">
+                        <i class="fas fa-shield-heart"></i> Censible
+                    </div>
+                    <p style="font-size: 0.9rem; color: #666;">Making our world better, one report at a time.</p>
+                </div>
+                <div>
+                    <p style="font-size: 0.9rem;">&copy; 2026 Civic Sense Initiative. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const toggleBtn = document.getElementById('theme-toggle');
+        const icon = toggleBtn.querySelector('i');
+        const body = document.body;
+
+        // Check local storage for theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+            icon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+
+            if (isDark) {
+                body.removeAttribute('data-theme');
+                icon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Intersection Observer for Animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.feature-card, .guide-card').forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = `all 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.1}s`;
+            observer.observe(el);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - VSSUT Civic Sense</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <div class="floating-dashboard">
+            <!-- Theme Toggle in Dashboard -->
+            <div class="dashboard-header">
+                <a href="index.html" class="logo-small" style="text-decoration: none; color: inherit;">
+                    <i class="fas fa-shield-heart"></i> Censible
+                </a>
+                <button id="theme-toggle" class="theme-toggle-sm" aria-label="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+
+            <div class="forms-container">
+                <!-- Login Form -->
+                <div id="login-form" class="form-section active">
+                    <h2>Welcome Back</h2>
+                    <p class="subtitle">Login to access your dashboard</p>
+
+                    <form onsubmit="handleLogin(event)">
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" placeholder="Registration Number / Email" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" placeholder="Password" required>
+                        </div>
+                        <div class="form-actions">
+                            <a href="#" class="forgot-pass" onclick="toggleForms('forgot')">Forgot Password?</a>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            Login <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+
+                    <p class="switch-text">
+                        New here? <a href="#" onclick="toggleForms('signup')">Create an account</a>
+                    </p>
+                </div>
+
+                <!-- Signup Form -->
+                <div id="signup-form" class="form-section">
+                    <h2>Join Us</h2>
+                    <p class="subtitle">Create a new account</p>
+
+                    <form onsubmit="handleSignup(event)">
+                        <div class="input-group">
+                            <i class="fas fa-user-circle"></i>
+                            <input type="text" placeholder="Full Name" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-id-card"></i>
+                            <input type="text" placeholder="Registration Number" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" placeholder="Email Address" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" placeholder="Password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            Sign Up <i class="fas fa-user-plus"></i>
+                        </button>
+                    </form>
+
+                    <p class="switch-text">
+                        Already have an account? <a href="#" onclick="toggleForms('login')">Login</a>
+                    </p>
+                </div>
+
+                <!-- Forgot Password Form -->
+                <div id="forgot-form" class="form-section">
+                    <h2>Recover Password</h2>
+                    <p class="subtitle">Enter your registered email</p>
+
+                    <form onsubmit="handleForgot(event)">
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" placeholder="Email Address" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            Send Password <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+
+                    <p class="switch-text">
+                        Remembered it? <a href="#" onclick="toggleForms('login')">Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.protocol === 'file:' ? 'http://127.0.0.1:5000' : '';
+
+        // Theme Logic
+        const toggleBtn = document.getElementById('theme-toggle');
+        const icon = toggleBtn.querySelector('i');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+            icon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                body.removeAttribute('data-theme');
+                icon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Form Toggle Logic
+        function toggleForms(target) {
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+
+            if (target === 'signup') {
+                loginForm.classList.remove('active');
+                setTimeout(() => {
+                    loginForm.style.display = 'none';
+                    signupForm.style.display = 'block';
+                    setTimeout(() => signupForm.classList.add('active'), 10);
+                }, 300);
+            } else if (target === 'forgot') {
+                loginForm.classList.remove('active');
+                signupForm.classList.remove('active');
+                const forgotForm = document.getElementById('forgot-form');
+
+                setTimeout(() => {
+                    loginForm.style.display = 'none';
+                    signupForm.style.display = 'none';
+                    forgotForm.style.display = 'block';
+                    setTimeout(() => forgotForm.classList.add('active'), 10);
+                }, 300);
+            } else {
+                signupForm.classList.remove('active');
+                const forgotForm = document.getElementById('forgot-form');
+                if (forgotForm) forgotForm.classList.remove('active');
+
+                setTimeout(() => {
+                    signupForm.style.display = 'none';
+                    if (forgotForm) forgotForm.style.display = 'none';
+                    loginForm.style.display = 'block';
+                    setTimeout(() => loginForm.classList.add('active'), 10);
+                }, 300);
+            }
+        }
+
+        // Initialize display
+        document.getElementById('signup-form').style.display = 'none';
+        document.getElementById('forgot-form').style.display = 'none';
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const form = e.target;
+            const inputs = form.querySelectorAll('input');
+            // Assuming first input is ID, second is Password based on order
+            const id = inputs[0].value;
+            const password = inputs[1].value;
+            const btn = form.querySelector('button');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, password, role: 'student' })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = 'student.html';
+                } else {
+                    alert('Login Failed: ' + data.error);
+                    btn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Login failed. Ensure backend is running.');
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function handleSignup(e) {
+            e.preventDefault();
+            const form = e.target;
+            const name = form.querySelector('input[placeholder="Full Name"]').value;
+            const id = form.querySelector('input[placeholder="Registration Number"]').value;
+            const email = form.querySelector('input[placeholder="Email Address"]').value;
+            const password = form.querySelector('input[placeholder="Password"]').value;
+            const btn = form.querySelector('button');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, password, name, email, role: 'student' })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Account created! Please login.');
+                    toggleForms('login');
+                    form.reset();
+                } else {
+                    alert('Registration Failed: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Registration failed. Ensure backend is running.');
+            } finally {
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function handleForgot(e) {
+            e.preventDefault();
+            const form = e.target;
+            const email = form.querySelector('input[type="email"]').value;
+            const btn = form.querySelector('button');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            try {
+                const response = await fetch(`${API_URL}/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(data.message);
+                    toggleForms('login');
+                    form.reset();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Request failed. Ensure backend is running.');
+            } finally {
+                btn.innerHTML = originalText;
+            }
+        }
+    </script>
+</body>
+
+</html>

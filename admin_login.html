@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - VSSUT Civic Sense</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .category-group {
+            margin-bottom: 3rem;
+        }
+
+        .category-title {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .login-card {
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <div class="floating-dashboard">
+            <div class="dashboard-header">
+                <a href="index.html" class="logo-small" style="text-decoration: none; color: inherit;">
+                    <i class="fas fa-shield-heart"></i> Censible Admin
+                </a>
+                <button id="theme-toggle" class="theme-toggle-sm" aria-label="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+
+            <div class="forms-container">
+                <!-- Admin Login Form -->
+                <div id="login-form" class="form-section active">
+                    <h2>Admin Access</h2>
+                    <p class="subtitle">Login to manage your domain</p>
+
+                    <form onsubmit="handleAdminLogin(event)">
+                        <div class="input-group">
+                            <i class="fas fa-id-badge"></i>
+                            <input type="text" id="login-id" placeholder="Admin ID" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <select id="login-domain" required>
+                                <option value="">Select Domain</option>
+                                <option value="College Premises">College Premises</option>
+                                <option value="Kalam Hall">Kalam Hall</option>
+                                <option value="Vasistha Hall">Vasistha Hall</option>
+                                <option value="Anuradha Hall">Anuradha Hall</option>
+                                <option value="Pulaha Hall">Pulaha Hall</option>
+                                <option value="Agastya Hall">Agastya Hall</option>
+                                <option value="Pulastya Hall">Pulastya Hall</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="login-pass" placeholder="Password" required>
+                        </div>
+
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            Login <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+
+                    <p class="switch-text">
+                        New Admin? <a href="#" onclick="toggleForms('signup')">Register here</a>
+                    </p>
+                </div>
+
+                <!-- Admin Signup Form -->
+                <div id="signup-form" class="form-section">
+                    <h2>New Admin</h2>
+                    <p class="subtitle">Register for domain access</p>
+
+                    <form onsubmit="handleAdminSignup(event)">
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" placeholder="Full Name" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-id-badge"></i>
+                            <input type="text" placeholder="Admin ID" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" placeholder="Email Address" required>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <select id="signup-domain" required>
+                                <option value="">Select Domain</option>
+                                <option value="College Premises">College Premises</option>
+                                <option value="Kalam Hall">Kalam Hall</option>
+                                <option value="Vasistha Hall">Vasistha Hall</option>
+                                <option value="Anuradha Hall">Anuradha Hall</option>
+                                <option value="Pulaha Hall">Pulaha Hall</option>
+                                <option value="Agastya Hall">Agastya Hall</option>
+                                <option value="Pulastya Hall">Pulastya Hall</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" placeholder="Password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            Register <i class="fas fa-user-plus"></i>
+                        </button>
+                    </form>
+
+                    <p class="switch-text">
+                        Existing Admin? <a href="#" onclick="toggleForms('login')">Login here</a>
+                    </p>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.protocol === 'file:' ? 'http://127.0.0.1:5000' : '';
+
+        // Theme Logic
+        const toggleBtn = document.getElementById('theme-toggle');
+        const icon = toggleBtn.querySelector('i');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+            icon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                body.removeAttribute('data-theme');
+                icon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Form Toggle Logic
+        function toggleForms(target) {
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+
+            if (target === 'signup') {
+                loginForm.classList.remove('active');
+                setTimeout(() => {
+                    loginForm.style.display = 'none';
+                    signupForm.style.display = 'block';
+                    setTimeout(() => signupForm.classList.add('active'), 10);
+                }, 300);
+            } else {
+                signupForm.classList.remove('active');
+
+
+                setTimeout(() => {
+                    signupForm.style.display = 'none';
+
+                    loginForm.style.display = 'block';
+                    setTimeout(() => loginForm.classList.add('active'), 10);
+                }, 300);
+            }
+        }
+
+        // Initialize
+        document.getElementById('signup-form').style.display = 'none';
+
+
+        // Auth Logic
+        async function handleAdminSignup(e) {
+            e.preventDefault();
+            const form = e.target;
+            const name = form.querySelector('input[placeholder="Full Name"]').value;
+            const id = form.querySelector('input[placeholder="Admin ID"]').value;
+            const email = form.querySelector('input[placeholder="Email Address"]').value;
+            const password = form.querySelector('input[placeholder="Password"]').value;
+            const domain = document.getElementById('signup-domain').value;
+            const btn = form.querySelector('button');
+            const originalText = btn.innerHTML;
+
+            if (!domain) {
+                alert('Please select a domain.');
+                return;
+            }
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, password, name, email, role: 'admin', domain })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Admin registered successfully! Please login.');
+                    toggleForms('login');
+                    form.reset();
+                } else {
+                    alert('Registration Failed: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Registration failed. Ensure backend is running.');
+            } finally {
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function handleAdminLogin(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerHTML;
+            const id = document.getElementById('login-id').value;
+            const password = document.getElementById('login-pass').value;
+            const domain = document.getElementById('login-domain').value;
+
+            if (!domain) {
+                alert('Please select your domain.');
+                return;
+            }
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, password, role: 'admin' })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.user.domain !== domain) {
+                        alert(`Warning: You are registered for ${data.user.domain}, but selected ${domain}. Redirecting to your registered domain.`);
+                    }
+
+                    localStorage.setItem('admin_user', JSON.stringify(data.user));
+                    localStorage.setItem('admin_category', data.user.domain);
+                    window.location.href = 'admin.html';
+                } else {
+                    alert('Login Failed: ' + data.error);
+                    btn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Login failed. Ensure backend is running.');
+                btn.innerHTML = originalText;
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>
